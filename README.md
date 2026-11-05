@@ -15,3 +15,7 @@ Pages: `index.html`, `portfolio.html`, `packages.html`, `quote.html`, `booking.h
 The contact form validates the enquiry and opens a prefilled email addressed to `wdominick920@gmail.com`. The visitor must send it from their email app. It does not store enquiries or submit them to a server. Direct website delivery requires an email service or backend configuration.
 
 Shared styling is in `assets/styles.css`, navigation and contact behavior in `assets/site.js`, and estimate logic in `assets/calculator.js`. Photographs are local assets extracted from the uploaded HTML.
+
+## Feedback and configuration
+
+The seventh page, `review.html`, collects private feedback with optional publication permission. Both forms default to email/WhatsApp drafts. See [form setup and moderation instructions](docs/FORM_SETUP.md) for optional Formspree activation and acknowledgement emails. No direct submission service is configured by default.
