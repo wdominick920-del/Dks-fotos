@@ -42,6 +42,19 @@ function setupForm(kind) {
     const params = new URLSearchParams(location.search);
     const service = document.getElementById('service');
     if ([...service.options].some(o => o.value === params.get('service'))) service.value = params.get('service');
+    const selectedEstimate = document.getElementById('selected-estimate');
+    if (params.get('estimate')) {
+      selectedEstimate.value = params.get('estimate').slice(0, 6000);
+      document.getElementById('enquiry-estimate').hidden = false;
+      const serviceValue = document.createElement('input');
+      serviceValue.type = 'hidden'; serviceValue.name = 'service'; serviceValue.value = service.value;
+      form.append(serviceValue); service.disabled = true;
+      service.setAttribute('aria-describedby', 'selected-estimate');
+      const selection = new URLSearchParams(params.get('selection') || '');
+      const safeSelection = new URLSearchParams();
+      ['category', 'packageIndex', 'qextra', 'qportrait', 'qlocations', 'qdistance', 'qportraits', 'qevents', 'qpriority'].forEach(key => { if (selection.has(key)) safeSelection.set(key, selection.get(key).slice(0, 20)); });
+      document.getElementById('edit-package').href = 'quote.html?' + safeSelection.toString() + '#calculator';
+    }
     if (params.has('package')) document.getElementById('message').value = `I’m interested in ${params.get('service') || 'photography'} — ${params.get('package')} (${params.get('price') || 'price to confirm'}). Please confirm availability and final pricing.`;
   }
   form.addEventListener('input', () => { drafts.hidden = true; status.textContent = ''; });
@@ -51,10 +64,10 @@ function setupForm(kind) {
     const data = new FormData(form);
     const read = name => String(data.get(name) || '').trim();
     if (!read('name') || (review ? read('review') : read('message')).length < 10 || (review && data.has('publishPermission') && !read('displayName'))) {
-      status.textContent = 'Please enter your name, at least 10 characters of feedback, and a display name if you permit publication.';
+      status.textContent = review ? 'Please enter your name, at least 10 characters of feedback, and a display name if you permit publication.' : 'Please enter your name and at least 10 characters about your occasion.';
       return;
     }
-    const fields = review ? [['Client name', 'name'], ['Service', 'service'], ['Event date', 'date'], ['Rating (out of 5)', 'rating'], ['Written review', 'review']] : [['Name', 'name'], ['Email', 'email'], ['Phone', 'phone'], ['Service', 'service'], ['Preferred date', 'date'], ['Location', 'location'], ['Message', 'message']];
+    const fields = review ? [['Client name', 'name'], ['Service', 'service'], ['Event date', 'date'], ['Rating (out of 5)', 'rating'], ['Written review', 'review']] : [['Name', 'name'], ['Email', 'email'], ['Phone', 'phone'], ['Service', 'service'], ['Preferred date', 'date'], ['Location', 'location'], ['Selected package estimate', 'estimate'], ['Message', 'message']];
     last = 'Hello DKs Photography,\n\n' + fields.map(([label, name]) => `${label}: ${read(name) || 'Not specified'}`).join('\n');
     if (review) last += '\nPermission to publish: ' + (data.has('publishPermission') ? 'Yes\nChosen display name: ' + read('displayName') : 'No — private feedback only');
     const subject = review ? 'DKs Photography — Client feedback' : 'Photography enquiry — ' + read('service');
