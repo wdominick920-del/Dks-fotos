@@ -45,7 +45,8 @@ function populate(selected = 0) {
 }
 function selectionParams() {
   const params = new URLSearchParams({ category: cat.value, packageIndex: pkg.value });
-  ['qextra', 'qportrait', 'qlocations', 'qdistance'].forEach(id => params.set(id, String(number(id))));
+  ['qextra', 'qportrait', 'qlocations'].forEach(id => params.set(id, String(number(id))));
+  params.set('qdistance', $('qdistance').value);
   ['qportraits', 'qevents', 'qpriority'].forEach(id => params.set(id, $(id).checked ? '1' : '0'));
   return params;
 }
@@ -53,7 +54,9 @@ function update() {
   $('quote-drafts').hidden = true; $('quote-status').textContent = '';
   const gi = Number(cat.value), p = groups[gi][1][Number(pkg.value) || 0];
   const portrait = gi === 5, wedding = gi === 4, commercial = gi === 6;
-  const km = number('qdistance'), hours = number('qextra'), blocks = number('qportrait'), locations = number('qlocations');
+  const distance = $('qdistance'), rawDistance = distance.value.trim(), blankDistance = rawDistance === '' && !distance.validity.badInput;
+  const km = blankDistance ? 0 : Number(rawDistance), invalidDistance = distance.validity.badInput || !Number.isFinite(km) || km < 0 || !Number.isFinite(km * DKS_CONFIG.travel.ratePerKm);
+  const hours = number('qextra'), blocks = number('qportrait'), locations = number('qlocations');
   [...$('qextra').options].forEach((option, index) => { option.textContent = index ? `${index} extra ${index === 1 ? 'hour' : 'hours'} (+${money(index * (wedding ? 900 : 500))})` : 'No additional hours'; });
   $('extra-hours-wrap').hidden = portrait; $('portrait-time-wrap').hidden = !portrait;
   $('portraits-option').hidden = !portrait; $('events-option').hidden = portrait || commercial;
@@ -72,22 +75,39 @@ function update() {
   if (portrait && $('qportraits').checked) lines.push(['5 additional edited portraits', 150]);
   if (!portrait && !commercial && $('qevents').checked) lines.push(['10 additional edited event photos', 200]);
   if ($('qpriority').checked) lines.push(['Priority delivery (subject to confirmation)', 350]);
-  const rule = DKS_CONFIG.travel, travel = km <= rule.freeReturnKm ? 0 : Math.round(km * rule.ratePerKm * 100) / 100;
-  lines.push(['Travel · ' + km + ' km return', travel]); $('qtravel').textContent = money(travel);
+  const rule = DKS_CONFIG.travel;
+  const chargeable = Math.max(0, km - rule.freeReturnKm);
+  const travel = Math.round((chargeable * rule.ratePerKm + Number.EPSILON) * 100) / 100;
+  distance.setAttribute('aria-invalid', String(invalidDistance));
+  $('distance-error').textContent = invalidDistance ? 'Enter a valid, non-negative return distance in kilometres.' : (blankDistance ? 'No distance entered. Travel is excluded from this estimate until a distance is provided.' : '');
+  $('travel-distance').textContent = invalidDistance ? 'Invalid distance' : blankDistance ? 'Not supplied' : km + ' km';
+  $('travel-allowance').textContent = rule.freeReturnKm + ' km';
+  $('travel-chargeable').textContent = invalidDistance || blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km';
+  $('qemail').disabled = invalidDistance; $('qcopy').disabled = invalidDistance;
+  $('qcontact').setAttribute('aria-disabled', String(invalidDistance));
+  if (invalidDistance) {
+    ['qtravel', 'qtotal', 'qdeposit', 'qbalance'].forEach(id => $(id).textContent = '—');
+    $('qbreakdown').textContent = 'Correct the travel distance to calculate your estimate.';
+    $('qcontact').removeAttribute('href'); last = ''; return;
+  }
+  lines.push([blankDistance ? 'Travel not entered — excluded pending confirmation' : 'Travel fee · ' + km + ' km return · ' + rule.freeReturnKm + ' km included · ' + Number(chargeable.toFixed(6)) + ' km chargeable', travel]);
+  $('qtravel').textContent = blankDistance ? 'Not entered' : money(travel);
   const total = lines.reduce((sum, line) => sum + line[1], 0);
   $('qbreakdown').replaceChildren(...lines.map(([label, cost]) => {
     const row = document.createElement('div'); row.className = 'quote-line';
     const name = document.createElement('span'), price = document.createElement('strong');
     name.textContent = label; price.textContent = money(cost); row.append(name, price); return row;
   }));
-  $('qtotal').textContent = money(total); $('qdeposit').textContent = money(total * .3); $('qbalance').textContent = money(total * .7);
-  last = 'DKs Photography — Quote request\n' + lines.map(([name, cost]) => name + ': ' + money(cost)).join('\n') + '\nEstimated total: ' + money(total) + '\n30% booking fee: ' + money(total * .3) + '\n70% remaining: ' + money(total * .7) + '\nPlease confirm availability and final pricing.';
+  const deposit = Math.round((total * .3 + Number.EPSILON) * 100) / 100, balance = Math.round((total - deposit + Number.EPSILON) * 100) / 100;
+  $('qtotal').textContent = money(total); $('qdeposit').textContent = money(deposit); $('qbalance').textContent = money(balance);
+  last = 'DKs Photography — Quote request\n' + lines.map(([name, cost]) => name + ': ' + money(cost)).join('\n') + '\nTravel policy: ' + DKS_CONFIG.travelText + '\nTotal return distance: ' + (blankDistance ? 'Not supplied' : km + ' km') + '\nFree allowance: ' + rule.freeReturnKm + ' km\nChargeable kilometres: ' + (blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km') + '\nEstimated total' + (blankDistance ? ' (excluding unconfirmed travel)' : '') + ': ' + money(total) + '\n30% booking fee: ' + money(deposit) + '\n70% remaining: ' + money(balance) + '\nPlease confirm availability and final pricing.';
   const params = new URLSearchParams({ service: serviceNames[gi], package: p[0], price: money(p[1]), estimate: last, selection: selectionParams().toString() });
   $('qcontact').href = 'contact.html?' + params.toString();
 }
 cat.addEventListener('change', () => { resetExtras(); populate(); });
 document.querySelectorAll('#calculator input, #calculator select').forEach(el => { if (el !== cat) el.addEventListener('input', update); });
 $('qreset').addEventListener('click', () => { cat.value = '0'; resetExtras(); populate(); });
+$('qcontact').addEventListener('click', event => { if ($('qcontact').getAttribute('aria-disabled') === 'true') { event.preventDefault(); $('qdistance').focus(); } });
 $('qemail').addEventListener('click', () => {
   dksDraftLinks($('quote-email'), $('quote-whatsapp'), 'DKs Photography — Custom quote request', last);
   $('quote-drafts').hidden = false; $('quote-status').textContent = DKS_MESSAGES.enquiryDraft;
@@ -105,8 +125,9 @@ const selected = Number(params.get('packageIndex'));
 populate(Number.isInteger(selected) && groups[Number(cat.value)][1][selected] ? selected : 0);
 ['qextra', 'qportrait', 'qlocations', 'qdistance'].forEach(id => {
   if (!params.has(id)) return;
+  if (id === 'qdistance' && params.get(id) === '') { $(id).value = ''; return; }
   const value = Number(params.get(id));
-  if (!Number.isFinite(value) || value < 0 || value > 10000) return;
+  if (!Number.isFinite(value) || value < 0 || (id !== 'qdistance' && value > 10000)) return;
   if ($(id).tagName === 'SELECT' && ![...$(id).options].some(o => o.value === String(value))) return;
   $(id).value = String(value);
 });

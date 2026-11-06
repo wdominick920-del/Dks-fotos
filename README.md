@@ -23,3 +23,7 @@ The seventh page, `review.html`, collects private feedback with optional publica
 ## Packages and enquiries
 
 `packages.html` is the separate package catalogue. Each package links to `quote.html` with its service and package selected. The quote calculator uses rounded service choices, package cards and extras selectors. The enquiry form preserves the itemised estimate, and its edit link restores selections in the calculator. Current prices are maintained in `assets/calculator.js` and the catalogue markup.
+
+## Photo privacy and travel
+
+`privacy.html` provides the readable photo privacy notice, a separate optional promotional-use choice form and change/withdrawal drafts. Consent records are prepared for private email/WhatsApp delivery and client copy/download; no direct consent service is configured. See `docs/PRIVACY_IMPLEMENTATION.md` for source and operational limitations. The first 20 km of total return travel are included; only distance beyond 20 km is charged at R4/km, configured in `assets/config.js`.

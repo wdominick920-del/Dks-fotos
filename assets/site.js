@@ -69,6 +69,7 @@ function setupForm(kind) {
     }
     const fields = review ? [['Client name', 'name'], ['Service', 'service'], ['Event date', 'date'], ['Rating (out of 5)', 'rating'], ['Written review', 'review']] : [['Name', 'name'], ['Email', 'email'], ['Phone', 'phone'], ['Service', 'service'], ['Preferred date', 'date'], ['Location', 'location'], ['Selected package estimate', 'estimate'], ['Message', 'message']];
     last = 'Hello DKs Photography,\n\n' + fields.map(([label, name]) => `${label}: ${read(name) || 'Not specified'}`).join('\n');
+    if (!review && !last.includes(DKS_CONFIG.travelText)) last += '\nTravel policy: ' + DKS_CONFIG.travelText;
     if (review) last += '\nPermission to publish: ' + (data.has('publishPermission') ? 'Yes\nChosen display name: ' + read('displayName') : 'No — private feedback only');
     const subject = review ? 'DKs Photography — Client feedback' : 'Photography enquiry — ' + read('service');
     dksDraftLinks(document.getElementById(review ? 'review-email' : 'email-fallback'), document.getElementById(review ? 'review-whatsapp' : 'enquiry-whatsapp'), subject, last);

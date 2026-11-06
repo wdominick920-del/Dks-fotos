@@ -17,9 +17,11 @@ Subject: Thank you for your DKs Photography enquiry
 
 Thank you for your enquiry! I appreciate you considering DKs Photography to capture your story. I’ll review your details and get back to you to discuss availability and the next steps. Your booking is confirmed only after the quotation and booking requirements have been agreed.
 
-## Travel rule for owner review
+## Travel policy
 
-Preserved rule in `assets/config.js`: total RETURN distance up to and including 10 km is free; above 10 km the whole return distance costs R4/km. Thus 11 km = R44 and 20 km = R80. This is not a charge only on the kilometres beyond the free threshold. Please review this policy before publishing pricing changes.
+The first 20 km of return travel from our Stellenbosch base are included. Additional distance is charged at R4 per kilometre. Travel costs are confirmed in your quotation before booking.
+
+Formula: max(0, return km - 20) × R4. Examples: 0/20 km = R0; 21 km = R4; 30 km = R40; 40 km = R80; 60 km = R160.
 
 ## Images and introductions
 
