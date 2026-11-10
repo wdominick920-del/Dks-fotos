@@ -42,3 +42,7 @@ All eight pages rendered without horizontal overflow at 360, 390, 430, 768 and 1
 ## Contact service picker
 
 Replaced the native contact service dropdown with an enhanced themed picker; the native required select remains the no-JavaScript fallback. Checked 360, 390, 430, 768 and 1366 pixel layouts, selection, arrow-key navigation, Escape/focus return, outside dismissal and no horizontal overflow. Verified required-service validation opens the choices, selected service is retained in the enquiry email payload, and arrivals from the quote calculator show the package service locked with an edit link. Touch-emulated selection and native fallback passed. Inspected mobile and desktop screenshots. No real enquiry was sent.
+
+## Business email and Gmail links
+
+All website email recipients and visible addresses now use dksphotography1@gmail.com. Direct email links open Gmail compose, and all five generated draft types (enquiry, quote, review, promotional choice and withdrawal) use the new recipient with their complete encoded subject/body. Each generated Gmail link has an equivalent mailto fallback for the default email app. Verified Gmail logos, safe new-tab attributes, special-character encoding, and the versioned consent record after updating the privacy contact address. Eight pages checked for overflow at 360, 390, 430, 768 and 1366 pixels. No emails were sent; inbox ownership, forwarding and delivery are not configured or verified by the website. Gmail app opening depends on the visitor's device; Gmail web remains available.

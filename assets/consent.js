@@ -2,7 +2,7 @@
 (() => {
   const form = document.getElementById('photo-consent-form');
   if (!form) return;
-  const version = '2026-11-06';
+  const version = '2026-11-10';
   const $ = id => document.getElementById(id);
   const channels = $('consent-channels'), child = $('child-authority');
   let downloadUrl;
@@ -10,7 +10,7 @@
   function invalidate() {
     $('consent-record').hidden = true; $('consent-status').textContent = ''; $('consent-error').textContent = ''; $('consent-copy-status').textContent = '';
     if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = undefined; }
-    $('consent-record-text').value = ''; $('consent-email').removeAttribute('href'); $('consent-whatsapp').removeAttribute('href'); $('consent-download').removeAttribute('href');
+    $('consent-record-text').value = ''; $('consent-email').removeAttribute('href'); document.getElementById('consent-email-mailto')?.removeAttribute('href'); $('consent-whatsapp').removeAttribute('href'); $('consent-download').removeAttribute('href');
   }
   form.addEventListener('input', invalidate);
   form.addEventListener('change', () => {

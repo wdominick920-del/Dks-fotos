@@ -17,8 +17,17 @@ window.DKS_MESSAGES = {
   reviewDraft: 'Your review is ready. Please press Send in your email app or WhatsApp to share it with DKs Photography.',
   reviewSuccess: 'Thank you for sharing your experience with DKs Photography. Your feedback helps me grow and helps future clients book with confidence.'
 };
+const DKS_EMAIL = 'dksphotography1@gmail.com';
 window.dksDraftLinks = (email, whatsapp, subject, body) => {
-  email.href = 'mailto:wdominick920@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  email.href = 'https://mail.google.com/mail/?' + new URLSearchParams({ view: 'cm', fs: '1', to: DKS_EMAIL, su: subject, body });
+  email.target = '_blank'; email.rel = 'noopener noreferrer';
+  let fallback = document.getElementById(email.id + '-mailto');
+  if (!fallback) {
+    fallback = document.createElement('a'); fallback.id = email.id + '-mailto'; fallback.className = 'email-app-fallback';
+    fallback.textContent = 'Use my email app instead'; fallback.setAttribute('aria-label', 'Open the same draft in your default email app');
+    email.after(fallback);
+  }
+  fallback.href = 'mailto:' + DKS_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   whatsapp.href = 'https://wa.me/27711833906?text=' + encodeURIComponent(body);
 };
 async function copyText(text, status) {
