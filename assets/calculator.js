@@ -100,8 +100,14 @@ function update() {
   }));
   const deposit = Math.round((total * .3 + Number.EPSILON) * 100) / 100, balance = Math.round((total - deposit + Number.EPSILON) * 100) / 100;
   $('qtotal').textContent = money(total); $('qdeposit').textContent = money(deposit); $('qbalance').textContent = money(balance);
-  last = 'DKs Photography — Quote request\n' + lines.map(([name, cost]) => name + ': ' + money(cost)).join('\n') + '\nTravel policy: ' + DKS_CONFIG.travelText + '\nTotal return distance: ' + (blankDistance ? 'Not supplied' : km + ' km') + '\nFree allowance: ' + rule.freeReturnKm + ' km\nChargeable kilometres: ' + (blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km') + '\nEstimated total' + (blankDistance ? ' (excluding unconfirmed travel)' : '') + ': ' + money(total) + '\n30% booking fee: ' + money(deposit) + '\n70% remaining: ' + money(balance) + '\nPlease confirm availability and final pricing.';
-  last = DKS_REFERENCE.message('Quote request', last).body;
+  last = DKS_REFERENCE.compose('QUOTE REQUEST', [
+    { heading: 'Package & coverage', text: 'Service: ' + serviceNames[gi] + '\nPackage: ' + p[0] + '\nCoverage: ' + p[2] + '\nImages: ' + p[3] + '\nPackage price: ' + money(p[1]) },
+    { heading: 'Selected extras', text: lines.slice(1, -1).length ? lines.slice(1, -1).map(([name, cost]) => '- ' + name + ': ' + money(cost)).join('\n') : 'No optional extras selected.' },
+    { heading: 'Travel breakdown', text: 'Total return distance: ' + (blankDistance ? 'Not supplied — travel excluded until confirmed' : km + ' km') + '\nFree allowance: ' + rule.freeReturnKm + ' km\nChargeable kilometres: ' + (blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km') + '\nTravel fee: ' + (blankDistance ? 'Not calculated' : money(travel)) },
+    { heading: 'Price summary', text: 'Estimated total' + (blankDistance ? ' (travel excluded)' : '') + ': ' + money(total) + '\n30% booking fee: ' + money(deposit) + '\nRemaining 70% balance: ' + money(balance) },
+    { heading: 'Travel policy', text: DKS_CONFIG.travelText },
+    { heading: 'Next step', text: 'Please confirm availability and final pricing. This estimate does not confirm a booking.' }
+  ]);
   const params = new URLSearchParams({ service: serviceNames[gi], package: p[0], price: money(p[1]), reference: DKS_REFERENCE.get(), estimate: last, selection: selectionParams().toString() });
   $('qcontact').href = 'contact.html?' + params.toString();
 }
@@ -110,7 +116,7 @@ document.querySelectorAll('#calculator input, #calculator select').forEach(el =>
 $('qreset').addEventListener('click', () => { cat.value = '0'; resetExtras(); populate(); });
 $('qcontact').addEventListener('click', event => { if ($('qcontact').getAttribute('aria-disabled') === 'true') { event.preventDefault(); $('qdistance').focus(); } });
 $('qemail').addEventListener('click', () => {
-  dksDraftLinks($('quote-email'), $('quote-whatsapp'), 'DKs Photography — Custom quote request', last);
+  dksDraftLinks($('quote-email'), $('quote-whatsapp'), 'DKs Photography | Quote request | ' + serviceNames[Number(cat.value)], last);
   $('quote-drafts').hidden = false; $('quote-status').textContent = DKS_MESSAGES.enquiryDraft;
 });
 $('qcopy').addEventListener('click', async () => {

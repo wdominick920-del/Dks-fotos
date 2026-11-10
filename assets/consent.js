@@ -36,31 +36,18 @@
     if (isChild && (!read('childIdentifier') || !read('adultAuthority'))) return fail('Identify the child and explain your legal authority.', 'child-name');
     const statement = yes ? 'Limited permission for the checked channels only, subject to restrictions and verification.' : read('promotion') === 'No' ? 'No promotional use is authorised.' : 'No publication is authorised until separate approval of specific photographs is recorded.';
     const allChannels = [...channels.querySelectorAll('input')].map(input => `${input.value}: ${selectedChannels.includes(input.value) ? 'AUTHORISED for this choice, subject to restrictions' : 'NOT authorised'}`);
-    const recordText = [
-      'DKs Photography — Photo-use choice',
-      'Notice version: ' + version,
-      'Notice: https://wdominick920-del.github.io/Dks-fotos/privacy.html',
-      'Record date (Africa/Johannesburg): ' + recordDate(),
-      'Prepared at (UTC): ' + new Date().toISOString(),
-      'Client name (private booking record only): ' + read('clientName'),
-      'Booking reference: ' + (read('bookingReference') || 'Not supplied; use event date'),
-      'Event date: ' + (read('eventDate') || 'Not supplied; use booking reference'),
-      'Explicit choice: ' + read('promotion'), statement,
-      'Choice is for: ' + read('representedPerson'),
-      ...(isChild ? ['Child identifier: ' + read('childIdentifier'), 'Adult relationship and legal authority: ' + read('adultAuthority')] : []),
-      'Channel choices:', ...allChannels,
-      'Restrictions / excluded photographs: ' + (read('restrictions') || 'None specified; channel and verification limits still apply'),
-      'Permission end date: ' + (read('permissionEndDate') || 'Not specified') + (yes ? '; permission can be withdrawn' : '; does not grant permission — no current publication authority'),
-      'Acknowledgement: ' + read('acknowledgement'),
-      'This does not permit publishing names or tagging clients. Other guests are not automatically covered.',
-      'Declining promotion does not affect the agreed service or price.',
-      'DKs Photography must verify the person, authority and relevant photographs before promotional use.',
-      'This record is a prepared choice, not proof of receipt. Please retain it privately with the booking.'
-    ].join('\n');
     const given = read('bookingReference');
-    const record = DKS_REFERENCE.message('Photo-use choice', recordText, given || DKS_REFERENCE.get()).body;
+    const record = DKS_REFERENCE.compose('PHOTO-USE CHOICE', [
+      { heading: 'Client & booking', text: 'Client: ' + read('clientName') + '\nBooking reference: ' + (given || 'Not supplied; identify by event date') + '\nEvent date: ' + (read('eventDate') || 'Not supplied; identify by booking reference') + '\nChoice is for: ' + read('representedPerson') },
+      { heading: 'Explicit photo-use choice', text: read('promotion') + '\n' + statement },
+      { heading: 'Channel permissions', text: allChannels.map(line => '- ' + line).join('\n') },
+      { heading: 'Restrictions & expiry', text: 'Restrictions / excluded photographs: ' + (read('restrictions') || 'None specified; channel and verification limits still apply') + '\nPermission end date: ' + (read('permissionEndDate') || 'Not specified') + (yes ? '; permission can be withdrawn' : '; no current publication authority') },
+      { heading: 'Child & adult authority', text: isChild ? 'Child identifier: ' + read('childIdentifier') + '\nAdult relationship and legal authority: ' + read('adultAuthority') : '' },
+      { heading: 'Notice & acknowledgement', text: 'Notice version: ' + version + '\nNotice: https://wdominick920-del.github.io/Dks-fotos/privacy.html\nRecord date (Africa/Johannesburg): ' + recordDate() + '\nPrepared at (UTC): ' + new Date().toISOString() + '\nAcknowledgement: ' + read('acknowledgement') },
+      { heading: 'Owner action', text: 'Verify the person, booking, relevant photographs and any child authority before promotional use. A reference alone is not authorisation.\nUnchecked channels, publishing names, tagging and other guests are not authorised.\nDeclining promotion does not affect the agreed service or price. Keep this record privately; it is not proof of receipt.' }
+    ], given || DKS_REFERENCE.get());
     $('consent-record-text').value = record; $('consent-record').hidden = false;
-    dksDraftLinks($('consent-email'), $('consent-whatsapp'), 'DKs Photography — Photo-use choice — ' + (read('bookingReference') || read('eventDate')), record);
+    dksDraftLinks($('consent-email'), $('consent-whatsapp'), 'DKs Photography | Photo-use choice', record);
     downloadUrl = URL.createObjectURL(new Blob([record], { type: 'text/plain;charset=utf-8' })); $('consent-download').href = downloadUrl;
     $('consent-status').textContent = 'Your photo-use choice is ready. Please press Send in your email app or WhatsApp so DKs Photography can receive it.';
     const channel = event.submitter?.dataset.channel || 'email';
@@ -75,9 +62,13 @@
     event.preventDefault(); if (!withdraw.reportValidity()) return;
     const data = new FormData(withdraw), read = name => String(data.get(name) || '').trim();
     if (!read('name') || !read('booking') || read('request').length < 10) { $('withdraw-status').textContent = 'Enter your name, booking reference or date, and at least 10 characters describing the requested change.'; return; }
-    let body = ['DKs Photography — Change or withdrawal of photo-use permission', 'Notice version: ' + version, 'Request date (Africa/Johannesburg): ' + recordDate(), 'Name: ' + read('name'), 'Booking reference or event date: ' + read('booking'), 'Requested change: ' + read('request'), 'Please verify this request, confirm receipt and discuss removal from channels you control. I understand this message does not automatically remove published photos or recover third-party copies and distributed print.'].join('\n');
-    body = DKS_REFERENCE.message('Change or withdrawal', body, read('booking')).body;
-    dksDraftLinks($('withdraw-email'), $('withdraw-whatsapp'), 'DKs Photography — Change or withdraw photo permission', body);
+    const body = DKS_REFERENCE.compose('PERMISSION CHANGE', [
+      { heading: 'Client & booking', text: 'Client: ' + read('name') + '\nBooking reference or event date: ' + read('booking') },
+      { heading: 'Requested change or withdrawal', text: read('request') },
+      { heading: 'Notice & request date', text: 'Notice version: ' + version + '\nRequest date (Africa/Johannesburg): ' + recordDate() },
+      { heading: 'Owner action', text: 'Verify the request and confirm receipt. Discuss removal from channels you control. This message does not automatically remove photographs or recover third-party copies and distributed print.' }
+    ], read('booking'));
+    dksDraftLinks($('withdraw-email'), $('withdraw-whatsapp'), 'DKs Photography | Permission change', body);
     $('withdraw-drafts').hidden = false;
     $('withdraw-status').textContent = 'Your change or withdrawal request is ready. Please press Send in your email app or WhatsApp. This contacts DKs Photography; it does not automatically remove published photographs.';
   });

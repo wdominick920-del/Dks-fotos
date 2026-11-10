@@ -77,11 +77,28 @@ function setupForm(kind) {
       status.textContent = review ? 'Please enter your name, at least 10 characters of feedback, and a display name if you permit publication.' : 'Please enter your name and at least 10 characters about your occasion.';
       return;
     }
-    const fields = review ? [['Client name', 'name'], ['Service', 'service'], ['Event date', 'date'], ['Rating (out of 5)', 'rating'], ['Written review', 'review']] : [['Name', 'name'], ['Email', 'email'], ['Phone', 'phone'], ['Service', 'service'], ['Preferred date', 'date'], ['Location', 'location'], ['Selected package estimate', 'estimate'], ['Message', 'message']];
-    last = 'Hello DKs Photography,\n\n' + fields.map(([label, name]) => `${label}: ${read(name) || 'Not specified'}`).join('\n');
-    if (!review && !last.includes(DKS_CONFIG.travelText)) last += '\nTravel policy: ' + DKS_CONFIG.travelText;
-    if (review) last += '\nPermission to publish: ' + (data.has('publishPermission') ? 'Yes\nChosen display name: ' + read('displayName') : 'No — private feedback only');
-    let subject = review ? 'DKs Photography — Client feedback' : 'Photography enquiry — ' + read('service');
+    const info = pairs => pairs.map(([label, name]) => label + ': ' + (read(name) || 'Not supplied')).join('\n');
+    let subject;
+    if (review) {
+      subject = 'DKs Photography | Client feedback | ' + read('service');
+      last = DKS_REFERENCE.compose('CLIENT FEEDBACK', [
+        { heading: 'Client & session', text: info([['Client', 'name'], ['Service', 'service'], ['Event date', 'date']]) },
+        { heading: 'Rating', text: read('rating') + ' / 5 stars' },
+        { heading: 'Written review', text: read('review') },
+        { heading: 'Review publication choice', text: data.has('publishPermission') ? 'Permission: Yes, subject to review.\nDisplay name: ' + read('displayName') : 'Permission: No — private feedback only.' },
+        { heading: 'Next step', text: 'Review this feedback privately. Do not publish automatically. Review permission is separate from permission to use client photographs.' }
+      ]);
+    } else {
+      subject = 'DKs Photography | Enquiry | ' + read('service');
+      last = DKS_REFERENCE.compose('PHOTOGRAPHY ENQUIRY', [
+        { heading: 'Client details', text: info([['Name', 'name'], ['Email', 'email'], ['Phone', 'phone']]) },
+        { heading: 'Session details', text: info([['Service', 'service'], ['Preferred date', 'date'], ['Venue / location', 'location']]) },
+        { heading: 'Client message', text: read('message') },
+        { heading: 'Selected package & estimate', text: read('estimate') ? DKS_REFERENCE.details(read('estimate')) : '' },
+        { heading: 'Travel policy', text: read('estimate') ? '' : DKS_CONFIG.travelText },
+        { heading: 'Next step', text: 'Please confirm availability, final quotation and booking requirements. This enquiry does not confirm a booking.' }
+      ]);
+    }
     const prepared = DKS_REFERENCE.message(subject, last); subject = prepared.subject; last = prepared.body;
     dksDraftLinks(document.getElementById(review ? 'review-email' : 'email-fallback'), document.getElementById(review ? 'review-whatsapp' : 'enquiry-whatsapp'), subject, last);
     const endpoint = review ? DKS_CONFIG.reviewEndpoint : DKS_CONFIG.enquiryEndpoint;
@@ -91,7 +108,7 @@ function setupForm(kind) {
       status.textContent = 'Submitting…';
       try {
         if (!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)) throw new Error('Unsupported endpoint');
-        data.set('subject', subject); data.set('clientReference', prepared.reference);
+        data.set('subject', subject); data.set('clientReference', prepared.reference); data.set('formattedMessage', last);
         if (review) {
           data.set('publication_permission', data.has('publishPermission') ? 'yes' : 'no');
           if (!data.has('publishPermission')) data.delete('displayName');

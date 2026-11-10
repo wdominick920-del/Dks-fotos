@@ -17,15 +17,37 @@
     return save(create());
   }
   const consentUrl = reference => 'https://wdominick920-del.github.io/Dks-fotos/privacy.html?reference=' + encodeURIComponent(reference) + '#photo-consent';
+  function sections(items) {
+    return items.filter(item => item.text && String(item.text).trim()).map(item => item.heading.toUpperCase() + '\n' + String(item.text).trim()).join('\n\n');
+  }
   function message(subject, body, reference = get()) {
     const existing = body.match(/^Client reference: ([^\r\n]+)(?:\r?\n|$)/);
     if (existing) reference = existing[1];
-    if (!existing) body = 'Client reference: ' + reference + '\n' + body;
-    if (valid(reference) && !body.includes(consentUrl(reference))) body += '\n\nOptional photo-use choice for this reference: ' + consentUrl(reference) + '\nPromotional permission is optional and does not affect the agreed service or price.';
+    else body = 'Client reference: ' + reference + '\nDKs Photography | GENERAL ENQUIRY\nStatus: Prepared message; receipt and booking not confirmed.\n\nMESSAGE\n' + body.trim();
+    const consentRecord = /DKs Photography \| (PHOTO-USE CHOICE|PERMISSION CHANGE)/.test(body);
+    if (!consentRecord && valid(reference) && !body.includes(consentUrl(reference))) body += '\n\nPHOTO-USE CHOICE (OPTIONAL)\n' + consentUrl(reference) + '\nSeparate from your booking; declining does not affect service or price.';
     if (!subject.includes(reference)) subject = '[' + reference + '] ' + subject;
     return { reference, subject, body };
   }
-  window.DKS_REFERENCE = { get, valid, message, consentUrl, fresh: () => save(create()) };
+  function compose(kind, items, reference = get()) {
+    const type = kind.toUpperCase();
+    const status = type === 'PHOTO-USE CHOICE' ? 'Client-prepared choice; verify identity and authority before use.' : type === 'PERMISSION CHANGE' ? 'Client-prepared request; verification and manual action required.' : type === 'CLIENT FEEDBACK' ? 'Client-prepared feedback; review before any publication.' : 'Request only; availability, quotation and booking require confirmation.';
+    const body = 'Client reference: ' + reference + '\nDKs Photography | ' + type + '\nStatus: ' + status + '\n\n' + sections(items);
+    return message('DKs Photography | ' + kind, body, reference).body;
+  }
+  function details(body) {
+    if (!body.startsWith('Client reference: ')) return body;
+    if (!/^Client reference: [^\n]+\nDKs Photography \| /.test(body)) {
+      return body.replace(/^Client reference: [^\n]+\n/, '').split('\n\nOptional photo-use choice for this reference:')[0].trim();
+    }
+    const start = body.indexOf('\n\n');
+    let content = start >= 0 ? body.slice(start + 2) : body;
+    for (const heading of ['\n\nPHOTO-USE CHOICE (OPTIONAL)\n', '\n\nNEXT STEP\n']) {
+      const end = content.indexOf(heading); if (end >= 0) content = content.slice(0, end);
+    }
+    return content.trim();
+  }
+  window.DKS_REFERENCE = { get, valid, message, compose, details, consentUrl, fresh: () => save(create()) };
   const quickLinks = [...document.querySelectorAll('a[href]')].filter(link => {
     try { const url = new URL(link.href); return url.hostname === 'mail.google.com' || url.hostname === 'wa.me'; } catch { return false; }
   }).map(link => ({ link, original: link.href }));
