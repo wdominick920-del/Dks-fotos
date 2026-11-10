@@ -19,6 +19,7 @@ window.DKS_MESSAGES = {
 };
 const DKS_EMAIL = 'dksphotography1@gmail.com';
 window.dksDraftLinks = (email, whatsapp, subject, body) => {
+  const prepared = DKS_REFERENCE.message(subject, body); subject = prepared.subject; body = prepared.body;
   email.href = 'https://mail.google.com/mail/?' + new URLSearchParams({ view: 'cm', fs: '1', to: DKS_EMAIL, su: subject, body });
   email.target = '_blank'; email.rel = 'noopener noreferrer';
   let fallback = document.getElementById(email.id + '-mailto');
@@ -80,7 +81,8 @@ function setupForm(kind) {
     last = 'Hello DKs Photography,\n\n' + fields.map(([label, name]) => `${label}: ${read(name) || 'Not specified'}`).join('\n');
     if (!review && !last.includes(DKS_CONFIG.travelText)) last += '\nTravel policy: ' + DKS_CONFIG.travelText;
     if (review) last += '\nPermission to publish: ' + (data.has('publishPermission') ? 'Yes\nChosen display name: ' + read('displayName') : 'No — private feedback only');
-    const subject = review ? 'DKs Photography — Client feedback' : 'Photography enquiry — ' + read('service');
+    let subject = review ? 'DKs Photography — Client feedback' : 'Photography enquiry — ' + read('service');
+    const prepared = DKS_REFERENCE.message(subject, last); subject = prepared.subject; last = prepared.body;
     dksDraftLinks(document.getElementById(review ? 'review-email' : 'email-fallback'), document.getElementById(review ? 'review-whatsapp' : 'enquiry-whatsapp'), subject, last);
     const endpoint = review ? DKS_CONFIG.reviewEndpoint : DKS_CONFIG.enquiryEndpoint;
     const submit = form.querySelector('[type=submit]');
@@ -89,7 +91,7 @@ function setupForm(kind) {
       status.textContent = 'Submitting…';
       try {
         if (!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)) throw new Error('Unsupported endpoint');
-        data.set('subject', subject);
+        data.set('subject', subject); data.set('clientReference', prepared.reference);
         if (review) {
           data.set('publication_permission', data.has('publishPermission') ? 'yes' : 'no');
           if (!data.has('publishPermission')) data.delete('displayName');

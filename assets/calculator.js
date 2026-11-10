@@ -101,7 +101,8 @@ function update() {
   const deposit = Math.round((total * .3 + Number.EPSILON) * 100) / 100, balance = Math.round((total - deposit + Number.EPSILON) * 100) / 100;
   $('qtotal').textContent = money(total); $('qdeposit').textContent = money(deposit); $('qbalance').textContent = money(balance);
   last = 'DKs Photography — Quote request\n' + lines.map(([name, cost]) => name + ': ' + money(cost)).join('\n') + '\nTravel policy: ' + DKS_CONFIG.travelText + '\nTotal return distance: ' + (blankDistance ? 'Not supplied' : km + ' km') + '\nFree allowance: ' + rule.freeReturnKm + ' km\nChargeable kilometres: ' + (blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km') + '\nEstimated total' + (blankDistance ? ' (excluding unconfirmed travel)' : '') + ': ' + money(total) + '\n30% booking fee: ' + money(deposit) + '\n70% remaining: ' + money(balance) + '\nPlease confirm availability and final pricing.';
-  const params = new URLSearchParams({ service: serviceNames[gi], package: p[0], price: money(p[1]), estimate: last, selection: selectionParams().toString() });
+  last = DKS_REFERENCE.message('Quote request', last).body;
+  const params = new URLSearchParams({ service: serviceNames[gi], package: p[0], price: money(p[1]), reference: DKS_REFERENCE.get(), estimate: last, selection: selectionParams().toString() });
   $('qcontact').href = 'contact.html?' + params.toString();
 }
 cat.addEventListener('change', () => { resetExtras(); populate(); });

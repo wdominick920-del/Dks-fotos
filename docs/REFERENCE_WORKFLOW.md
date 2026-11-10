@@ -1,0 +1,11 @@
+# Enquiry references and photo choices
+
+References are request identifiers, not a verified client database, booking confirmation, receipt, or photo-publication authority. A DKS reference contains a Johannesburg creation date and 64 cryptographically random bits. There is no global database guarantee of uniqueness. A new browser tab/session may have a different identifier; follow-up messages should retain the number in the original message. Start a new enquiry reference explicitly when beginning a separate request.
+
+Only the opaque reference is retained in session storage to keep quote/contact navigation and reloads consistent. If session storage is unavailable, the current page can still generate a reference and links carry it where possible. Names, email addresses, messages, consent choices and client records are not put in that storage or public repository files. The actual record remains in the client's sent email/WhatsApp and DKs Photography's private booking records once received.
+
+Email/Gmail and WhatsApp drafts include the reference. Gmail subjects also identify it. Ordinary direct email and WhatsApp shortcuts receive the same enquiry reference. Quote-to-contact links carry only the reference and public estimate selections. The message contains an optional photo-consent URL with that reference; no personal details or consent choices are put in that URL.
+
+The privacy page accepts a given reference, prefills the existing optional photo-use form, and records the reference together with explicit choices, restrictions, representation and acknowledgement. It does not search for or reveal a client record. A reference alone is not identity or legal authority to approve photographs. Refusal and ask-first choices remain available; promotional permission is separate from the enquiry and agreed service/price. Existing private records must be verified manually before publication.
+
+The website still prepares drafts rather than sending them or recording client consent on a server. Clients must press Send. A configured private submission/booking service would be needed for verified client accounts, server-assigned permanent references, consent lookup, and automatic private record storage. No such service is configured by this change.

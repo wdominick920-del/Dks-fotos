@@ -36,7 +36,7 @@
     if (isChild && (!read('childIdentifier') || !read('adultAuthority'))) return fail('Identify the child and explain your legal authority.', 'child-name');
     const statement = yes ? 'Limited permission for the checked channels only, subject to restrictions and verification.' : read('promotion') === 'No' ? 'No promotional use is authorised.' : 'No publication is authorised until separate approval of specific photographs is recorded.';
     const allChannels = [...channels.querySelectorAll('input')].map(input => `${input.value}: ${selectedChannels.includes(input.value) ? 'AUTHORISED for this choice, subject to restrictions' : 'NOT authorised'}`);
-    const record = [
+    const recordText = [
       'DKs Photography — Photo-use choice',
       'Notice version: ' + version,
       'Notice: https://wdominick920-del.github.io/Dks-fotos/privacy.html',
@@ -57,6 +57,8 @@
       'DKs Photography must verify the person, authority and relevant photographs before promotional use.',
       'This record is a prepared choice, not proof of receipt. Please retain it privately with the booking.'
     ].join('\n');
+    const given = read('bookingReference');
+    const record = DKS_REFERENCE.message('Photo-use choice', recordText, given || DKS_REFERENCE.get()).body;
     $('consent-record-text').value = record; $('consent-record').hidden = false;
     dksDraftLinks($('consent-email'), $('consent-whatsapp'), 'DKs Photography — Photo-use choice — ' + (read('bookingReference') || read('eventDate')), record);
     downloadUrl = URL.createObjectURL(new Blob([record], { type: 'text/plain;charset=utf-8' })); $('consent-download').href = downloadUrl;
@@ -73,7 +75,8 @@
     event.preventDefault(); if (!withdraw.reportValidity()) return;
     const data = new FormData(withdraw), read = name => String(data.get(name) || '').trim();
     if (!read('name') || !read('booking') || read('request').length < 10) { $('withdraw-status').textContent = 'Enter your name, booking reference or date, and at least 10 characters describing the requested change.'; return; }
-    const body = ['DKs Photography — Change or withdrawal of photo-use permission', 'Notice version: ' + version, 'Request date (Africa/Johannesburg): ' + recordDate(), 'Name: ' + read('name'), 'Booking reference or event date: ' + read('booking'), 'Requested change: ' + read('request'), 'Please verify this request, confirm receipt and discuss removal from channels you control. I understand this message does not automatically remove published photos or recover third-party copies and distributed print.'].join('\n');
+    let body = ['DKs Photography — Change or withdrawal of photo-use permission', 'Notice version: ' + version, 'Request date (Africa/Johannesburg): ' + recordDate(), 'Name: ' + read('name'), 'Booking reference or event date: ' + read('booking'), 'Requested change: ' + read('request'), 'Please verify this request, confirm receipt and discuss removal from channels you control. I understand this message does not automatically remove published photos or recover third-party copies and distributed print.'].join('\n');
+    body = DKS_REFERENCE.message('Change or withdrawal', body, read('booking')).body;
     dksDraftLinks($('withdraw-email'), $('withdraw-whatsapp'), 'DKs Photography — Change or withdraw photo permission', body);
     $('withdraw-drafts').hidden = false;
     $('withdraw-status').textContent = 'Your change or withdrawal request is ready. Please press Send in your email app or WhatsApp. This contacts DKs Photography; it does not automatically remove published photographs.';

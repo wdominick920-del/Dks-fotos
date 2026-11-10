@@ -27,3 +27,7 @@ The seventh page, `review.html`, collects private feedback with optional publica
 ## Photo privacy and travel
 
 `privacy.html` provides the readable photo privacy notice, a separate optional promotional-use choice form and change/withdrawal drafts. Consent records are prepared for private email/WhatsApp delivery and client copy/download; no direct consent service is configured. See `docs/PRIVACY_IMPLEMENTATION.md` for source and operational limitations. The first 20 km of total return travel are included; only distance beyond 20 km is charged at R4/km, configured in `assets/config.js`.
+
+## Enquiry references
+
+Automatic DKS enquiry references are included in Gmail and WhatsApp drafts, with a reference-prefilled optional photo-consent link. The privacy page also accepts an existing reference. See `docs/REFERENCE_WORKFLOW.md` for how references are retained and the distinction between a prepared request and a confirmed booking or verified consent.
