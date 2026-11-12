@@ -54,3 +54,19 @@ Refined the Gmail SVG mark and its rounded white background. Verified automatic 
 ## Owner-friendly email and WhatsApp layouts
 
 Verified all five message types (enquiry, quote, feedback, photo-use choice, permission change) have a single reference envelope and matching Gmail, WhatsApp and mailto body contents. Checked special characters and multiline messages, unchanged quote maths, travel/booking-fee/balance details, exact consent notice/acknowledgement/channel/restriction/expiry values, refusal and ask-first semantics. Verified contact enquiries retain quote details without duplicate envelopes or consent footers; legacy quote-format detail extraction preserves the original estimate. Enquiry copy and client-visible consent records match the prepared messages. All eight pages passed horizontal-overflow and mobile-menu checks at 360, 390, 430, 768 and 1366 pixels. Touch-emulated quote draft controls passed. No real messages were sent; these are browser viewport/touch-emulation and draft-content checks, not physical-phone or inbox-delivery tests. Synthetic preview is stored outside the public checkout.
+
+## Usability review — 12 November 2026
+
+Prepared locally for review; not published or pushed. Package/add-on prices and the 20 km return allowance/R4 rate are unchanged.
+
+- Chromium rendered all eight pages at 360, 390, 430, 768 and 1366 px with no horizontal overflow or JavaScript errors. Desktop and phone screenshots were visually inspected; all screenshot photographs loaded. Screenshots: `/workspace/dks-review-artifacts/usability-{page}-{390|1366}.png`.
+- All 28 package catalogue links select their intended calculator package. Calculator → contact preserves the itemised estimate; editing a quote and returning preserves typed name/phone/message and updates travel pricing.
+- One-way tests: 0→0 return/R0; 5→10/R0; 10→20/R0; 10.5→21/R4; 15→30/R40; 20→40/R80; 30→60/R160. A 10.555 km input produces R4.44 travel. Negative/invalid input blocks totals; blank excludes unconfirmed travel clearly. Booking fee plus balance equals total. Legacy `qdistance=40` restores as 20 km one way and R80; new `distanceMode=oneway&qdistance=20` also gives R80.
+- Phone-only enquiry succeeds; missing reply method is rejected. Mailto and WhatsApp handoffs encode the same concise content; clipboard output matches. Full records remain separately available. No messages were sent.
+- Consent tested with no default selection, refusal, restricted channel permission and expiry, ask-first, authorised-child fields and clearing child details when returning to self. Notice version and exact choice match the generated email record. Consent remains separate from enquiries.
+- Service picker: native keyboard arrows, Escape/focus restoration, outside click, all five widths, touch emulation, validation and native no-JavaScript fallback passed. Calendar: all five widths, day selection, focus containment/restoration, clear, month navigation and leap-day handling passed. Review rating keyboard controls and private-by-default publication choice passed. Gallery keyboard navigation/Escape passed.
+- Local links/anchors, unique IDs, JavaScript syntax and whitespace checks passed.
+
+Reproduce the main regression with `python3 tests/usability.py`, using installed Playwright and `/usr/bin/chromium`. These are browser emulation checks, not physical-phone or screen-reader certification. Actual email-app opening and message delivery were not tested. Direct submission services remain unconfigured, and the original photo privacy PDF remains unavailable for comparison.
+
+The four newly pasted wedding/detail photographs were visible in chat but absent from the downloadable attachments and workspace. They have not been recreated or added. Original files or a ZIP are still needed.

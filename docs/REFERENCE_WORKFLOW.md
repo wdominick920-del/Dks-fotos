@@ -1,5 +1,7 @@
 # Enquiry references and photo choices
 
+> Current behaviour (12 November 2026): The full reference remains in outgoing messages and detailed records. The contact reference explanation is expandable below enquiry controls; the optional consent link is secondary. Privacy uses one booking-reference/event-date entry instead of a duplicate reference step. Opening quick WhatsApp links use a brief general greeting.
+
 References are request identifiers, not a verified client database, booking confirmation, receipt, or photo-publication authority. A DKS reference contains a Johannesburg creation date and 64 cryptographically random bits. There is no global database guarantee of uniqueness. A new browser tab/session may have a different identifier; follow-up messages should retain the number in the original message. Start a new enquiry reference explicitly when beginning a separate request.
 
 Only the opaque reference is retained in session storage to keep quote/contact navigation and reloads consistent. If session storage is unavailable, the current page can still generate a reference and links carry it where possible. Names, email addresses, messages, consent choices and client records are not put in that storage or public repository files. The actual record remains in the client's sent email/WhatsApp and DKs Photography's private booking records once received.

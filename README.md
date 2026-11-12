@@ -1,6 +1,6 @@
 # DKs Photography
 
-A responsive six-page business website built with HTML, CSS and JavaScript. Original photography, prices, booking terms and the quote calculator are retained from the supplied website. No build step or external dependencies are required.
+A responsive eight-page business website built with HTML, CSS and JavaScript. Original photography, prices, booking terms and the quote calculator are retained from the supplied website. No build step or external dependencies are required.
 
 ## Run locally
 
@@ -10,7 +10,7 @@ From this directory:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Pages: `index.html`, `portfolio.html`, `packages.html`, `quote.html`, `booking.html`, and `contact.html`. Deploy the entire directory to any static web host.
+Pages: `index.html`, `portfolio.html`, `packages.html`, `quote.html`, `booking.html`, `contact.html`, `review.html`, and `privacy.html`. Deploy the entire directory to any static web host.
 
 The contact form validates the enquiry and opens a prefilled email addressed to `dksphotography1@gmail.com`. The visitor must send it from their email app. It does not store enquiries or submit them to a server. Direct website delivery requires an email service or backend configuration.
 
@@ -30,4 +30,14 @@ The seventh page, `review.html`, collects private feedback with optional publica
 
 ## Enquiry references
 
-Automatic DKS enquiry references are included in Gmail and WhatsApp drafts, with a reference-prefilled optional photo-consent link. The privacy page also accepts an existing reference. See `docs/REFERENCE_WORKFLOW.md` for how references are retained and the distinction between a prepared request and a confirmed booking or verified consent.
+Automatic DKS enquiry references are included in email and WhatsApp drafts. The optional photo-consent link is kept in a secondary enquiry-reference section. The privacy form accepts a known reference or event date in one step. See `docs/REFERENCE_WORKFLOW.md` for how references are retained and the distinction between a prepared request and a confirmed booking or verified consent.
+
+## Usability draft — 12 November 2026
+
+Main navigation is Home, Portfolio, Prices and Contact. The portfolio shows photographs before the personal introduction. Prices links prominently to the separate calculator; the calculator has one enquiry route to contact. Ordinary opening messages are concise; full itemised records remain expandable and copyable. Standard mailto links support the client’s email app, with optional Gmail and copy-address controls.
+
+The travel input is **one-way kilometres**. Return travel is calculated at twice that distance, with the existing 20 km return allowance and R4/km rate unchanged. New selection URLs include `distanceMode=oneway`. Legacy URLs without that marker interpret `qdistance` as return kilometres and divide it by two for the new input. Do not remove this compatibility conversion.
+
+Contact requires an email address or usable phone number. Entered details are retained in the browser history entry during quote editing, rather than written into URL parameters or public files. Only the public updated estimate passes temporarily through sessionStorage; consent records are never stored there. Browser storage restrictions may limit editing restoration; ordinary enquiry links and form entry still work.
+
+Run the browser regression with `python3 tests/usability.py` (requires Python Playwright and Chromium at `/usr/bin/chromium`). Screenshots are written outside the public checkout under `/workspace/dks-review-artifacts/`. This draft is prepared for review and has not been deployed.

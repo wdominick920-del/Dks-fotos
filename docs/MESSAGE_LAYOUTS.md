@@ -1,5 +1,7 @@
 # Owner-friendly message layouts
 
+> Current behaviour (12 November 2026): Ordinary enquiry handoffs now use concise client/session/package/extra/travel/total details and a reference, without status envelopes, repeated policy paragraphs or consent URLs. Full structured records remain available to expand/copy. Email handoffs use mailto first, with optional Gmail links. Consent and withdrawal retain their exact detailed records.
+
 All messages use plain text so the structure survives Gmail, default mail apps, copy/paste and WhatsApp. Formatting uses short headings and blank lines rather than HTML, wide tables or app-specific markup. Email subjects retain the reference for searching and identify the message type. The website cannot control edits a client makes before sending or the receiving app's fonts.
 
 - General enquiries: reference, client/session details, client message, optional selected estimate, and next step.

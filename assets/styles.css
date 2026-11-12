@@ -43,3 +43,18 @@ input[type=date]{color-scheme:dark}.date-trigger{width:100%;display:flex;align-i
 .contact-service-picker .service-option-copy strong{font-size:16px}.contact-service-picker .service-option-copy small{font-size:13px}
 .gmail-logo{width:24px;height:24px;flex-shrink:0;display:inline-block;vertical-align:middle}.gmail-link{display:inline-flex;align-items:center;gap:10px;max-width:100%;overflow-wrap:anywhere;min-height:44px}.email-app-fallback{display:inline-flex;align-items:center;min-height:44px;font-size:13px;color:var(--gold);text-decoration:underline;text-underline-offset:4px}.contact-details>a.gmail-link{display:flex;font-size:clamp(13px,3.7vw,16px);word-break:break-word}.gmail-link:focus-visible,.email-app-fallback:focus-visible{outline:2px solid var(--gold);outline-offset:4px}.privacy-page .gmail-link{flex-wrap:wrap}
 .gmail-logo{width:26px;height:26px;box-sizing:content-box;padding:6px;border-radius:10px;background:#fff;box-shadow:0 2px 8px #0002;vertical-align:middle}.gmail-link{gap:12px}.reference-panel{border:1px solid #77603f;border-radius:22px;background:linear-gradient(135deg,#30291f,#191a1c);padding:22px;margin-bottom:24px}.reference-panel output{display:block;overflow-wrap:anywhere;font-family:ui-monospace,monospace;font-size:16px;color:#f0cf97;letter-spacing:.03em;margin:14px 0}.reference-panel p{font-size:13px;color:var(--muted);line-height:1.8}.reference-panel a,.reference-panel button{display:inline-flex;align-items:center;min-height:44px;color:var(--gold);font:inherit;font-size:13px}.reference-panel button{border:1px solid #8b724c;border-radius:999px;background:transparent;padding:10px 14px;cursor:pointer}.reference-panel a{text-decoration:underline;text-underline-offset:4px}#reference-consent-form .btn{margin-top:20px}#reference-consent-status{color:var(--gold);line-height:1.8}
+
+/* Simpler journeys, retaining the studio's black and gold palette. */
+input,select,textarea{font-size:16px}
+summary{cursor:pointer;min-height:44px;padding:12px 0;color:var(--gold);font-weight:600}
+details{min-width:0}details>textarea{width:100%;box-sizing:border-box}details[open]>summary{margin-bottom:12px}
+#enquiry-reference{margin-top:24px}#enquiry-reference>summary{font-size:1.1rem}
+.secondary-permission{margin-top:24px;padding-top:18px;border-top:1px solid #d6b47a44}
+.email-link{overflow-wrap:anywhere}.action-row>a,.action-row>button,.privacy-navigation>a{min-height:44px}
+.contact-details img{max-height:200px;object-fit:cover}.contact-details h2{font-size:1.65rem}
+#enquiry-drafts details{flex-basis:100%}.quote-actions .btn{white-space:normal;text-align:center}
+#portfolio .action-row{margin-top:28px}.behind-lens{border-top:1px solid #d6b47a44}
+.privacy-notice details{border-top:1px solid #d6b47a44;padding:8px 0}
+@media(max-width:767px){.contact-layout{display:flex;flex-direction:column}.contact-details{width:100%;box-sizing:border-box}.contact-details img,.contact-details .note{display:none}.contact-details h2{display:none}.contact-details p{margin:8px 0}.contact-details .social-links{margin:10px 0}.hero{min-height:65vh}.wrap{padding-top:40px;padding-bottom:40px}.contact-page .section-heading{margin-bottom:24px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+form label,form legend{font-size:16px}footer a:not(.logo),#primary-nav a{display:inline-flex;align-items:center;min-height:44px}.prices-quote-link{margin-top:20px}.email-app-fallback{display:inline-flex;align-items:center;min-height:44px}

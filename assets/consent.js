@@ -10,7 +10,7 @@
   function invalidate() {
     $('consent-record').hidden = true; $('consent-status').textContent = ''; $('consent-error').textContent = ''; $('consent-copy-status').textContent = '';
     if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = undefined; }
-    $('consent-record-text').value = ''; $('consent-email').removeAttribute('href'); document.getElementById('consent-email-mailto')?.removeAttribute('href'); $('consent-whatsapp').removeAttribute('href'); $('consent-download').removeAttribute('href');
+    $('consent-record-text').value = ''; $('consent-email').removeAttribute('href'); document.getElementById('consent-email-gmail')?.removeAttribute('href'); $('consent-whatsapp').removeAttribute('href'); $('consent-download').removeAttribute('href');
   }
   form.addEventListener('input', invalidate);
   form.addEventListener('change', () => {

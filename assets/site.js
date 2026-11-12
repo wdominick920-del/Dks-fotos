@@ -8,6 +8,7 @@ toggle.addEventListener('click', () => {
   toggle.setAttribute('aria-expanded', String(open));
   nav.classList.toggle('is-open', open);
 });
+nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { closeMenu(); toggle.focus(); } });
 document.addEventListener('click', event => { if (!event.target.closest('header')) closeMenu(); });
 document.querySelectorAll('[data-travel-policy]').forEach(el => el.textContent = DKS_CONFIG.travelText);
@@ -18,21 +19,22 @@ window.DKS_MESSAGES = {
   reviewSuccess: 'Thank you for sharing your experience with DKs Photography. Your feedback helps me grow and helps future clients book with confidence.'
 };
 const DKS_EMAIL = 'dksphotography1@gmail.com';
-window.dksDraftLinks = (email, whatsapp, subject, body) => {
-  const prepared = DKS_REFERENCE.message(subject, body); subject = prepared.subject; body = prepared.body;
-  email.href = 'https://mail.google.com/mail/?' + new URLSearchParams({ view: 'cm', fs: '1', to: DKS_EMAIL, su: subject, body });
-  email.target = '_blank'; email.rel = 'noopener noreferrer';
-  let fallback = document.getElementById(email.id + '-mailto');
-  if (!fallback) {
-    fallback = document.createElement('a'); fallback.id = email.id + '-mailto'; fallback.className = 'email-app-fallback';
-    fallback.textContent = 'Use my email app instead'; fallback.setAttribute('aria-label', 'Open the same draft in your default email app');
-    email.after(fallback);
+window.dksDraftLinks = (email, whatsapp, subject, body, exact = false) => {
+  const prepared = exact ? {subject, body} : DKS_REFERENCE.message(subject, body);
+  subject = prepared.subject; body = prepared.body;
+  email.href = 'mailto:' + DKS_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  email.removeAttribute('target'); email.setAttribute('aria-label', 'Open email draft in your email app');
+  email.textContent = 'Open email draft'; email.classList.remove('gmail-link');
+  let gmail = document.getElementById(email.id + '-gmail');
+  if (!gmail) {
+    gmail = document.createElement('a'); gmail.id = email.id + '-gmail'; gmail.className = 'email-app-fallback';
+    gmail.textContent = 'Open in Gmail'; gmail.target = '_blank'; gmail.rel = 'noopener noreferrer'; email.after(gmail);
   }
-  fallback.href = 'mailto:' + DKS_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  gmail.href = 'https://mail.google.com/mail/?' + new URLSearchParams({view:'cm', fs:'1', to:DKS_EMAIL, su:subject, body});
   whatsapp.href = 'https://wa.me/27711833906?text=' + encodeURIComponent(body);
 };
 async function copyText(text, status) {
-  try { await navigator.clipboard.writeText(text); status.textContent = 'Copied. Paste it into your email app or WhatsApp, then press Send.'; }
+  try { await navigator.clipboard.writeText(text); status.textContent = text === DKS_EMAIL ? 'Email address copied.' : 'Copied. Paste it into your email app or WhatsApp, then press Send.'; }
   catch { status.textContent = 'Copy is unavailable. Use an email or WhatsApp draft instead; your details remain in the form.'; }
 }
 function setupForm(kind) {
@@ -41,9 +43,10 @@ function setupForm(kind) {
   if (!form) return;
   const status = document.getElementById(review ? 'review-status' : 'form-status');
   const drafts = document.getElementById(review ? 'review-drafts' : 'enquiry-drafts');
-  let last = '';
+  let last = '', opening = '';
   const copy = document.getElementById(review ? 'copy-review' : 'copy-enquiry');
-  copy.addEventListener('click', () => copyText(last, status));
+  copy.addEventListener('click', () => copyText(review ? last : opening, status));
+  document.getElementById('copy-full-enquiry')?.addEventListener('click', () => copyText(last, status));
   if (review) {
     const permission = document.getElementById('publish-permission');
     const display = document.getElementById('display-name');
@@ -62,10 +65,33 @@ function setupForm(kind) {
       service.setAttribute('aria-describedby', 'selected-estimate');
       const selection = new URLSearchParams(params.get('selection') || '');
       const safeSelection = new URLSearchParams();
-      ['category', 'packageIndex', 'qextra', 'qportrait', 'qlocations', 'qdistance', 'qportraits', 'qevents', 'qpriority'].forEach(key => { if (selection.has(key)) safeSelection.set(key, selection.get(key).slice(0, 20)); });
+      ['distanceMode', 'category', 'packageIndex', 'qextra', 'qportrait', 'qlocations', 'qdistance', 'qportraits', 'qevents', 'qpriority'].forEach(key => { if (selection.has(key)) safeSelection.set(key, selection.get(key).slice(0, 20)); });
       document.getElementById('edit-package').href = 'quote.html?' + safeSelection.toString() + '#calculator';
     }
-    if (params.has('package')) document.getElementById('message').value = `I’m interested in ${params.get('service') || 'photography'} — ${params.get('package')} (${params.get('price') || 'price to confirm'}). Please confirm availability and final pricing.`;
+    if (params.has('package')) document.getElementById('message').value = 'Please confirm availability for my selected package.';
+    // History state keeps entered details through calculator edits without placing them in URLs or persistent storage.
+    const fields = ['name','email','phone','date','location','message'];
+    const saved = history.state?.enquiryFields;
+    if (saved) { fields.forEach(name => { if (saved[name] !== undefined) form.elements[name].value = saved[name]; }); form.elements.consent.checked = saved.replyConsent === true; }
+    form.addEventListener('input', () => {
+      const values = Object.fromEntries(fields.map(name => [name, form.elements[name].value]));
+      values.replyConsent = form.elements.consent.checked; history.replaceState({...history.state, enquiryFields:values}, '');
+    });
+    document.getElementById('edit-package').addEventListener('click', event => {
+      // Return to this history entry after editing so the browser retains the private form state.
+      event.preventDefault(); history.replaceState({...history.state, editingQuote:true}, '');
+      const target = new URL(event.currentTarget.href); target.searchParams.set('returnToEnquiry','1'); location.href = target.href;
+    });
+    const email = form.elements.email, phone = form.elements.phone;
+    const validateReply = () => {
+      const usablePhone = /^\+?[\d\s().-]+$/.test(phone.value.trim()) && phone.value.replace(/\D/g,'').length >= 7;
+      email.setCustomValidity(!email.value.trim() && !usablePhone ? 'Provide a valid email address or phone number with at least seven digits.' : '');
+      phone.setCustomValidity(phone.value.trim() && !usablePhone ? 'Enter a usable phone number, or clear it and provide an email address.' : '');
+      email.setAttribute('aria-invalid', String(!email.validity.valid)); phone.setAttribute('aria-invalid', String(!phone.validity.valid));
+    };
+    email.addEventListener('input', validateReply); phone.addEventListener('input', validateReply);
+    form.addEventListener('click', event => { if (event.target.closest('[type=submit]')) validateReply(); });
+    validateReply();
   }
   form.addEventListener('input', () => { drafts.hidden = true; status.textContent = ''; });
   form.addEventListener('submit', async event => {
@@ -100,7 +126,16 @@ function setupForm(kind) {
       ]);
     }
     const prepared = DKS_REFERENCE.message(subject, last); subject = prepared.subject; last = prepared.body;
-    dksDraftLinks(document.getElementById(review ? 'review-email' : 'email-fallback'), document.getElementById(review ? 'review-whatsapp' : 'enquiry-whatsapp'), subject, last);
+    if (!review) {
+      const estimate = read('estimate') ? DKS_REFERENCE.details(read('estimate')) : '';
+      const useful = estimate.split('\n').filter(line => /^(Package:|Travel fee:|Estimated total|Additional photography|Extra portrait|Additional locations|- )/.test(line));
+      opening = 'Hi DKs Photography! I’d like to enquire about a photography booking.\n\n' +
+        [['Name','name'],['Email','email'],['Phone','phone'],['Service','service'],['Date','date'],['Venue','location']].filter(([,name]) => read(name)).map(([label,name]) => label + ': ' + read(name)).join('\n') +
+        '\n\n' + read('message') + (useful.length ? '\n\n' + useful.join('\n') : '') +
+        '\n\nReference: ' + prepared.reference + '\nPlease confirm availability and final pricing.';
+      document.getElementById('enquiry-record').value = last;
+    }
+    dksDraftLinks(document.getElementById(review ? 'review-email' : 'email-fallback'), document.getElementById(review ? 'review-whatsapp' : 'enquiry-whatsapp'), subject, review ? last : opening, !review);
     const endpoint = review ? DKS_CONFIG.reviewEndpoint : DKS_CONFIG.enquiryEndpoint;
     const submit = form.querySelector('[type=submit]');
     if (endpoint) {
@@ -161,3 +196,17 @@ if (floating && 'IntersectionObserver' in window) {
   });
   document.querySelectorAll('form, footer, .quote-summary').forEach(el => observer.observe(el));
 }
+
+document.getElementById('copy-email')?.addEventListener('click', () => copyText(DKS_EMAIL, document.getElementById('copy-email-status')));
+
+window.addEventListener('pageshow', () => {
+  if (!document.getElementById('contact-form')) return;
+  try {
+    const pending = sessionStorage.getItem('dks.updated-public-quote');
+    if (!pending) return;
+    sessionStorage.removeItem('dks.updated-public-quote');
+    const url = new URL(pending, location.href);
+    if (url.origin !== location.origin || !url.pathname.endsWith('/contact.html')) return;
+    history.replaceState(history.state, '', url); location.reload();
+  } catch { /* Back navigation still preserves the original form. */ }
+});

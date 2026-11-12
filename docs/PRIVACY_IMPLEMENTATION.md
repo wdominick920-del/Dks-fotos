@@ -1,5 +1,7 @@
 # Photo privacy and promotional choice implementation
 
+> Current behaviour (12 November 2026): The notice has a short summary, three section links and native expandable secondary explanations. All substantive content and consent safeguards remain. The duplicate reference-entry form was removed; a known reference still prefills the main consent field. Draft handoffs now use standard email apps first with an optional Gmail link.
+
 The website notice is version 2026-11-06. It was drafted from the owner's detailed requirements in chat. The referenced DKs_Photography_Photo_Privacy_and_Consent.pdf was not attached as an accessible file and was not present in the workspace; its wording could not be compared and no PDF download was invented. Supply the PDF for source reconciliation before treating this as a transcription of that document.
 
 No direct consent submission service is configured. The form prepares email and WhatsApp drafts, offers copy and a text-file download, and says the owner receives the choice only after the client presses Send. The downloadable record is client controlled; it is not a claim of server storage. No feedback or consent records are written into public files or browser local storage. No automatic publication is implemented.

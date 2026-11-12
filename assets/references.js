@@ -24,8 +24,6 @@
     const existing = body.match(/^Client reference: ([^\r\n]+)(?:\r?\n|$)/);
     if (existing) reference = existing[1];
     else body = 'Client reference: ' + reference + '\nDKs Photography | GENERAL ENQUIRY\nStatus: Prepared message; receipt and booking not confirmed.\n\nMESSAGE\n' + body.trim();
-    const consentRecord = /DKs Photography \| (PHOTO-USE CHOICE|PERMISSION CHANGE)/.test(body);
-    if (!consentRecord && valid(reference) && !body.includes(consentUrl(reference))) body += '\n\nPHOTO-USE CHOICE (OPTIONAL)\n' + consentUrl(reference) + '\nSeparate from your booking; declining does not affect service or price.';
     if (!subject.includes(reference)) subject = '[' + reference + '] ' + subject;
     return { reference, subject, body };
   }
@@ -48,16 +46,9 @@
     return content.trim();
   }
   window.DKS_REFERENCE = { get, valid, message, compose, details, consentUrl, fresh: () => save(create()) };
-  const quickLinks = [...document.querySelectorAll('a[href]')].filter(link => {
-    try { const url = new URL(link.href); return url.hostname === 'mail.google.com' || url.hostname === 'wa.me'; } catch { return false; }
-  }).map(link => ({ link, original: link.href }));
   function updateQuickLinks() {
-    quickLinks.forEach(({link, original}) => {
-      const url = new URL(original);
-      const prepared = message(url.searchParams.get('su') || 'DKs Photography enquiry', url.searchParams.get(url.hostname === 'wa.me' ? 'text' : 'body') || 'Hello DKs Photography, I would like to enquire about a photography booking.');
-      if (url.hostname === 'wa.me') url.searchParams.set('text', prepared.body);
-      else { url.searchParams.set('su', prepared.subject); url.searchParams.set('body', prepared.body); }
-      link.href = url.toString();
+    document.querySelectorAll('a[href*="wa.me/27711833906"]').forEach(link => {
+      link.href = 'https://wa.me/27711833906?text=' + encodeURIComponent('Hi DKs Photography! I’d like to enquire about a photography booking.');
     });
   }
   updateQuickLinks();

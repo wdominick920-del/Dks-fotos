@@ -15,6 +15,9 @@ const money = n => 'R' + n.toLocaleString('en-ZA', { minimumFractionDigits: 2, m
 const number = id => { const value = Number($(id).value); return Number.isFinite(value) ? Math.min(10000, Math.max(0, value)) : 0; };
 const selectionControls = [];
 let last = '';
+const record = document.createElement('details');
+record.innerHTML = '<summary>Full itemised estimate</summary><textarea id="estimate-record" readonly rows="12" aria-label="Full itemised estimate"></textarea>';
+$('qcopy').before(record);
 groups.forEach((group, i) => cat.add(new Option(serviceNames[i], String(i))));
 const description = document.createElement('p');
 description.className = 'service-description';
@@ -44,18 +47,18 @@ function populate(selected = 0) {
   update();
 }
 function selectionParams() {
-  const params = new URLSearchParams({ category: cat.value, packageIndex: pkg.value });
+  const params = new URLSearchParams({ category: cat.value, packageIndex: pkg.value, distanceMode: 'oneway' });
   ['qextra', 'qportrait', 'qlocations'].forEach(id => params.set(id, String(number(id))));
   params.set('qdistance', $('qdistance').value);
   ['qportraits', 'qevents', 'qpriority'].forEach(id => params.set(id, $(id).checked ? '1' : '0'));
   return params;
 }
 function update() {
-  $('quote-drafts').hidden = true; $('quote-status').textContent = '';
+  $('quote-status').textContent = '';
   const gi = Number(cat.value), p = groups[gi][1][Number(pkg.value) || 0];
   const portrait = gi === 5, wedding = gi === 4, commercial = gi === 6;
   const distance = $('qdistance'), rawDistance = distance.value.trim(), blankDistance = rawDistance === '' && !distance.validity.badInput;
-  const km = blankDistance ? 0 : Number(rawDistance), invalidDistance = distance.validity.badInput || !Number.isFinite(km) || km < 0 || !Number.isFinite(km * DKS_CONFIG.travel.ratePerKm);
+  const km = blankDistance ? 0 : Number(rawDistance) * 2, invalidDistance = distance.validity.badInput || !Number.isFinite(km) || km < 0 || !Number.isFinite(km * DKS_CONFIG.travel.ratePerKm);
   const hours = number('qextra'), blocks = number('qportrait'), locations = number('qlocations');
   [...$('qextra').options].forEach((option, index) => { option.textContent = index ? `${index} extra ${index === 1 ? 'hour' : 'hours'} (+${money(index * (wedding ? 900 : 500))})` : 'No additional hours'; });
   $('extra-hours-wrap').hidden = portrait; $('portrait-time-wrap').hidden = !portrait;
@@ -79,16 +82,16 @@ function update() {
   const chargeable = Math.max(0, km - rule.freeReturnKm);
   const travel = Math.round((chargeable * rule.ratePerKm + Number.EPSILON) * 100) / 100;
   distance.setAttribute('aria-invalid', String(invalidDistance));
-  $('distance-error').textContent = invalidDistance ? 'Enter a valid, non-negative return distance in kilometres.' : (blankDistance ? 'No distance entered. Travel is excluded from this estimate until a distance is provided.' : '');
+  $('distance-error').textContent = invalidDistance ? 'Enter a valid, non-negative one-way distance in kilometres.' : (blankDistance ? 'No distance entered. Travel is excluded from this estimate until a distance is provided.' : '');
   $('travel-distance').textContent = invalidDistance ? 'Invalid distance' : blankDistance ? 'Not supplied' : km + ' km';
   $('travel-allowance').textContent = rule.freeReturnKm + ' km';
   $('travel-chargeable').textContent = invalidDistance || blankDistance ? 'Not calculated' : Number(chargeable.toFixed(6)) + ' km';
-  $('qemail').disabled = invalidDistance; $('qcopy').disabled = invalidDistance;
+  $('qcopy').disabled = invalidDistance;
   $('qcontact').setAttribute('aria-disabled', String(invalidDistance));
   if (invalidDistance) {
     ['qtravel', 'qtotal', 'qdeposit', 'qbalance'].forEach(id => $(id).textContent = '—');
     $('qbreakdown').textContent = 'Correct the travel distance to calculate your estimate.';
-    $('qcontact').removeAttribute('href'); last = ''; return;
+    $('qcontact').removeAttribute('href'); last = ''; $('estimate-record').value = ''; return;
   }
   lines.push([blankDistance ? 'Travel not entered — excluded pending confirmation' : 'Travel fee · ' + km + ' km return · ' + rule.freeReturnKm + ' km included · ' + Number(chargeable.toFixed(6)) + ' km chargeable', travel]);
   $('qtravel').textContent = blankDistance ? 'Not entered' : money(travel);
@@ -110,18 +113,19 @@ function update() {
   ]);
   const params = new URLSearchParams({ service: serviceNames[gi], package: p[0], price: money(p[1]), reference: DKS_REFERENCE.get(), estimate: last, selection: selectionParams().toString() });
   $('qcontact').href = 'contact.html?' + params.toString();
+  $('estimate-record').value = last;
 }
 cat.addEventListener('change', () => { resetExtras(); populate(); });
 document.querySelectorAll('#calculator input, #calculator select').forEach(el => { if (el !== cat) el.addEventListener('input', update); });
 $('qreset').addEventListener('click', () => { cat.value = '0'; resetExtras(); populate(); });
-$('qcontact').addEventListener('click', event => { if ($('qcontact').getAttribute('aria-disabled') === 'true') { event.preventDefault(); $('qdistance').focus(); } });
-$('qemail').addEventListener('click', () => {
-  dksDraftLinks($('quote-email'), $('quote-whatsapp'), 'DKs Photography | Quote request | ' + serviceNames[Number(cat.value)], last);
-  $('quote-drafts').hidden = false; $('quote-status').textContent = DKS_MESSAGES.enquiryDraft;
-});
+$('qcontact').addEventListener('click', event => {
+  if (new URLSearchParams(location.search).get('returnToEnquiry') === '1' && $('qcontact').getAttribute('aria-disabled') !== 'true') {
+    try { sessionStorage.setItem('dks.updated-public-quote', $('qcontact').href); event.preventDefault(); history.back(); return; } catch { /* Normal link remains available. */ }
+  }
+  if ($('qcontact').getAttribute('aria-disabled') === 'true') { event.preventDefault(); $('qdistance').focus(); } });
 $('qcopy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(last); $('quote-status').textContent = 'Estimate copied. Paste it into your enquiry, then press Send.'; }
-  catch { $('quote-status').textContent = 'Copy is unavailable. Use the enquiry form or prepare an email or WhatsApp draft.'; }
+  catch { $('quote-status').textContent = 'Copy is unavailable. Select and copy the full estimate below, or use the enquiry form.'; }
 });
 // Restore only known public selections; personal details never enter this URL.
 const params = new URLSearchParams(location.search);
@@ -136,7 +140,7 @@ populate(Number.isInteger(selected) && groups[Number(cat.value)][1][selected] ? 
   const value = Number(params.get(id));
   if (!Number.isFinite(value) || value < 0 || (id !== 'qdistance' && value > 10000)) return;
   if ($(id).tagName === 'SELECT' && ![...$(id).options].some(o => o.value === String(value))) return;
-  $(id).value = String(value);
+  $(id).value = String(id === 'qdistance' && params.get('distanceMode') !== 'oneway' ? value / 2 : value);
 });
 ['qportraits', 'qevents', 'qpriority'].forEach(id => $(id).checked = params.get(id) === '1');
 update();
