@@ -40,4 +40,4 @@ The travel input is **one-way kilometres**. Return travel is calculated at twice
 
 Contact requires an email address or usable phone number. Entered details are retained in the browser history entry during quote editing, rather than written into URL parameters or public files. Only the public updated estimate passes temporarily through sessionStorage; consent records are never stored there. Browser storage restrictions may limit editing restoration; ordinary enquiry links and form entry still work.
 
-Run the browser regression with `python3 tests/usability.py` (requires Python Playwright and Chromium at `/usr/bin/chromium`). Screenshots are written outside the public checkout under `/workspace/dks-review-artifacts/`. This draft is prepared for review and has not been deployed.
+Run the browser regression with `python3 tests/usability.py` (requires Python Playwright and Chromium at `/usr/bin/chromium`). Screenshots are written outside the public checkout under `/workspace/dks-review-artifacts/`. This usability update includes four additional supplied wedding/detail photographs; publishing status is recorded in the delivery report.

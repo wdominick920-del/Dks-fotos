@@ -57,7 +57,7 @@ Verified all five message types (enquiry, quote, feedback, photo-use choice, per
 
 ## Usability review — 12 November 2026
 
-Prepared locally for review; not published or pushed. Package/add-on prices and the 20 km return allowance/R4 rate are unchanged.
+Reviewed locally, then authorised for GitHub Pages publication with the supplied photo ZIP. Package/add-on prices and the 20 km return allowance/R4 rate are unchanged.
 
 - Chromium rendered all eight pages at 360, 390, 430, 768 and 1366 px with no horizontal overflow or JavaScript errors. Desktop and phone screenshots were visually inspected; all screenshot photographs loaded. Screenshots: `/workspace/dks-review-artifacts/usability-{page}-{390|1366}.png`.
 - All 28 package catalogue links select their intended calculator package. Calculator → contact preserves the itemised estimate; editing a quote and returning preserves typed name/phone/message and updates travel pricing.
@@ -69,4 +69,6 @@ Prepared locally for review; not published or pushed. Package/add-on prices and 
 
 Reproduce the main regression with `python3 tests/usability.py`, using installed Playwright and `/usr/bin/chromium`. These are browser emulation checks, not physical-phone or screen-reader certification. Actual email-app opening and message delivery were not tested. Direct submission services remain unconfigured, and the original photo privacy PDF remains unavailable for comparison.
 
-The four newly pasted wedding/detail photographs were visible in chat but absent from the downloadable attachments and workspace. They have not been recreated or added. Original files or a ZIP are still needed.
+The subsequent ZIP supplied all four wedding/detail photographs. Each was visually inspected, resized into responsive WebP assets and added to the portfolio; the sweetheart-table photograph also appears in the homepage selection. Captions describe the actual photographs. The gallery now contains 15 photographs.
+
+After adding the ZIP photographs, the complete `tests/usability.py` regression passed again at all five widths, including loaded image checks, all 28 packages, quote editing and consent records.
